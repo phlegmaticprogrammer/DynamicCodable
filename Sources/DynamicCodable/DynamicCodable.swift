@@ -48,12 +48,6 @@ public struct CodableTypeRegistry {
             })
         try register(codableType)
     }
-
-    
-    public static func register<C : Codable>(_ ty : C.Type) throws {
-        let typeId = "\(ty)"
-        try register(ty, as: typeId)
-    }
     
     public static func lookup(typeId : CodableTypeId) -> CodableType? {
         lock.lock()
@@ -73,13 +67,7 @@ public struct DynamicCodable : Decodable, Encodable {
         self.typeId = typeId
         self.value = value
     }
-    
-    public init(_ value : Any) {
-        let ty = type(of: value)
-        self.typeId = "\(ty)"
-        self.value = value
-    }
-    
+        
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         typeId = try container.decode(String.self)
