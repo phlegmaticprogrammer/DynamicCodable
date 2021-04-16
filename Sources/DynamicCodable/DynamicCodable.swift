@@ -21,6 +21,15 @@ public struct CodableType {
     
     public let dynamicEncode : (_ value : AnyHashable, inout UnkeyedEncodingContainer) throws -> Void
     
+    public init(typeId : CodableTypeId,
+                dynamicDecode: @escaping (inout UnkeyedDecodingContainer) throws -> AnyHashable,
+                dynamicEncode: @escaping (_ value : AnyHashable, inout UnkeyedEncodingContainer) throws -> Void)
+    {
+        self.typeId = typeId
+        self.dynamicDecode = dynamicDecode
+        self.dynamicEncode = dynamicEncode
+    }
+    
 }
 
 public struct CodableTypeRegistry {
