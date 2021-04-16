@@ -9,15 +9,17 @@ public enum DynamicCodableError : Error {
     case noSuchTypeIdFound(typeId : CodableTypeId)
     
     case cannotEncode(value : Any, typeId : CodableTypeId)
+
+    case cannotDecode(typeId : CodableTypeId)
 }
 
 public struct CodableType {
     
     public let typeId : CodableTypeId
     
-    public let dynamicDecode : (inout UnkeyedDecodingContainer) throws -> Any
+    public let dynamicDecode : (inout UnkeyedDecodingContainer) throws -> AnyHashable
     
-    public let dynamicEncode : (_ value : Any, inout UnkeyedEncodingContainer) throws -> Void
+    public let dynamicEncode : (_ value : AnyHashable, inout UnkeyedEncodingContainer) throws -> Void
     
 }
 
@@ -38,7 +40,10 @@ public struct CodableTypeRegistry {
         let codableType = CodableType(
             typeId: typeId,
             dynamicDecode: { container in
-                return try container.decode(ty)
+                guard let h = (try container.decode(ty)) as? AnyHashable else {
+                    throw DynamicCodableError.cannotDecode(typeId: typeId)
+                }
+                return h
             },
             dynamicEncode: { value, container in
                 guard let typedValue : C = value as? C else {
@@ -57,13 +62,13 @@ public struct CodableTypeRegistry {
     
 }
 
-public struct DynamicCodable : Decodable, Encodable {
+public struct DynamicCodable : Decodable, Encodable, Hashable {
     
     public let typeId : CodableTypeId
     
-    public let value : Any
+    public let value : AnyHashable
             
-    public init(typeId : CodableTypeId, value : Any) {
+    public init<H:Hashable>(typeId : CodableTypeId, value : H) {
         self.typeId = typeId
         self.value = value
     }
