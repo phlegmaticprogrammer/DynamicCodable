@@ -1,3 +1,3 @@
 # DynamicCodable
 
-A description of this package.
+Provides an application wide global registry for dynamic encoding and decoding.
